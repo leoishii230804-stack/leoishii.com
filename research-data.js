@@ -25,7 +25,7 @@ const RESEARCH = [
     title: "Analysis of Empirical Bubble Detection Methods",
     subtitle: "Professor Schlegl's Macroeconomics Seminar Research Paper (Co-Authored) - January 2026",
     tag: null,
-    abstract: null,
+    abstract: "My section of the paper looks at the empirical methods used to detect overheating in the Japanese economy by the Bank of Japan (BOJ) in their financial systems report. Through analysing the FAIX and Financial Gap methods, we find that these give a general macro overview of the economy. However, we also find that it is important to delve into the microstructures that back the macro overview as these give an explanation and context to the macro indicators.\n\nI also evaluate the cointegration/integration method by Diba and Grossman (1988) and discuss how this method's never bursting bubble idea allows researchers to empirically detect bubbles. I further looked into the critque by Evans (1991) which demonstrated that Diba and Grossman's tests fail to detect periodically collapsing rational bubbles as it can mimic a series close to the fundamentals of the asset price movement. I come to a conclusion that using this methodology, even if the data suggests no bubbles, it is wrong to state that a bubble does not exist.",
   },
   {
     slug: "carry-trades-currency-crashes",
