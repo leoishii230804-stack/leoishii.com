@@ -172,9 +172,12 @@
         <!-- Commentary -->
         <section id="commentary" class="mt-[72px] scroll-mt-8">
             <a href="commentary.html" class="inline-block">
-                <h2 class="text-3xl font-bold text-accent dark:text-accentSoft mb-8 hover:underline">Market &amp;
+                <h2 class="text-3xl font-bold text-accent dark:text-accentSoft mb-2 hover:underline">Market &amp;
                     Economic Commentary</h2>
             </a>
+            <p class="text-sm text-zinc-500 dark:text-slate-400 italic mb-6">These posts are just for practicing my
+                analysis skills — treat them as a personal exercise, not professional advice, and assume the
+                information may be incomplete or wrong.</p>
             <div id="commentary-latest"></div>
         </section>
 
@@ -262,7 +265,9 @@
 
         function excerpt(body, maxLen) {
             maxLen = maxLen || 220;
-            const firstPara = body.split('\n\n')[0];
+            const firstPara = Array.isArray(body)
+                ? ((body.find((b) => b.type === 'text') || {}).text || '')
+                : body.split('\n\n')[0];
             if (firstPara.length <= maxLen) return firstPara;
             return firstPara.slice(0, maxLen).replace(/\s+\S*$/, '') + '…';
         }
@@ -274,10 +279,11 @@
                 return;
             }
             const latest = [...COMMENTARY].sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+            const meta = formatDate(latest.date) + (latest.readTime ? ' · ' + latest.readTime : '');
             container.innerHTML = `
         <article>
           <h3 class="text-xl font-semibold text-zinc-900 dark:text-ink">${escapeHtml(latest.title)}</h3>
-          <p class="text-sm text-zinc-500 dark:text-slate-400 mt-1">${formatDate(latest.date)}</p>
+          <p class="text-sm text-zinc-500 dark:text-slate-400 mt-1">${meta}</p>
           <p class="mt-3 text-base leading-relaxed text-zinc-600 dark:text-ink">${escapeHtml(excerpt(latest.body))} <a href="commentary-post.html?slug=${encodeURIComponent(latest.slug)}" class="text-accent dark:text-accentSoft hover:underline">more</a></p>
         </article>
         <a href="commentary.html" class="inline-block mt-6 text-base text-accent dark:text-accentSoft hover:underline">View all commentary →</a>
