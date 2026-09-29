@@ -98,4 +98,53 @@ reg d_jgb10 d_ust10 post2020 ust10_post d_usdjpy d_VIX d_BrentOil d_BOJPolicyRat
       { type: "text", text: "This analysis suggests that across the full sample, both BOJ policy rate and UST10 played a statistically significant role in driving JGB10. A deeper investigation found that pre-July 2022 JGB10 movements may have been more domestically influenced compared to post-July 2022. However, the relationship across the break did not structurally change." },
     ],
   },
+  {
+    slug: "japan-inflation-regime-shift-2021",
+    title: "Analysing Japan's Post-2021 Inflation Regime Shift",
+    date: "2026-09-29",
+    readTime: "5 min read",
+    sourceLink: "https://www.bloomberg.com/news/articles/2026-09-25/japan-s-finance-minister-says-takaichi-is-not-a-reflationist",
+    codeLabel: "Stata do-file",
+    code: `import excel using "/Users/leoishii/Downloads/Commentary Sep 25/Sep 25.xlsx", firstrow clear
+
+gen mdate = mofd(ObservationDate)
+format mdate %tm
+tsset mdate
+
+gen InflRate = Inflation * 100
+
+twoway line InflRate ObservationDate
+
+dfuller InflRate, lags(12)
+
+gen d_InflRate = d.InflRate
+dfuller d_InflRate, lags(12)
+
+reg InflRate L.InflRate, r
+estat sbsingle
+
+reg InflRate L.InflRate if mdate <  tm(2021m5), r
+reg InflRate L.InflRate if mdate >= tm(2021m5), r
+
+dfuller InflRate if mdate <  tm(2021m5), lags(4)
+dfuller InflRate if mdate >= tm(2021m5), lags(4)
+`,
+    body: [
+      { type: "text", text: "In an article “Japan’s Finance Minister Says Takaichi Isn’t ‘Reflationist’”, Satsuki Katayama mentioned that with the return of inflation to Japan, the conditions were no longer the same. This was said in order to dissuade the Reflationist view on the Japanese Prime Minister. This short commentary looks at how inflation conditions in Japan has evolved through 2000 to 2026." },
+      { type: "image", src: "commentary-images/2026-09-29-inflation-chart.png", alt: "Line chart of Japan's inflation rate from 2000 to 2026", caption: "Figure 1" },
+      { type: "text", text: "By first observing the inflation rate in Japan in Figure 1, we can observe that from 2000 to 2021, inflation rate hovered around 0% with occasional spikes in both directions. Post-2021, inflation hovers at a higher positive rate." },
+      { type: "image", src: "commentary-images/2026-09-29-adf-inflrate.png", alt: "Augmented Dickey-Fuller test for unit root on InflRate", caption: "Figure 2" },
+      { type: "text", text: "I used an Augmented Dickey-Fuller test to observe the inflation rate process and found that it is a non-stationary process, meaning that the process’ mean and variance changes over time." },
+      { type: "image", src: "commentary-images/2026-09-29-adf-dinflrate.png", alt: "Augmented Dickey-Fuller test for unit root on the first difference of InflRate", caption: "Figure 3" },
+      { type: "text", text: "I then ran the ADF test again but with the first difference of the inflation rate process. This was done to see whether the change in inflation rate over time is also a random walk or is constant over time. The results show that the change in inflation rate over time is constant as it is a stationary process." },
+      { type: "image", src: "commentary-images/2026-09-29-ar1-regression.png", alt: "AR(1) regression of inflation rate on its 1-lagged value", caption: "Figure 3" },
+      { type: "text", text: "This finding is further supported by the AR(1) regression in Figure 3. By regressing inflation rate by the 1-lagged value of inflation, I find that they are highly correlated (0.97 coefficient)." },
+      { type: "image", src: "commentary-images/2026-09-29-structural-break.png", alt: "Test for a structural break with unknown break date, estimated break date 2021m5", caption: "Figure 4" },
+      { type: "text", text: "I also let Stata find the best point for a structural break in the inflation rate process and it found one on May 2021. I will use this date as a cut-off date and analyze the pre and post cut-off periods." },
+      { type: "image", src: "commentary-images/2026-09-29-pre-break-regression.png", alt: "Pre-break AR(1) regression of inflation rate", caption: "Figure 5" },
+      { type: "image", src: "commentary-images/2026-09-29-post-break-regression.png", alt: "Post-break AR(1) regression of inflation rate", caption: "Figure 6" },
+      { type: "text", text: "Figure 5 regresses the pre-break period and Figure 6 is the post-break period. The first observation I made was that the post-break period is less persistent, however, it is only slightly. I also examined the long-run mean of the two through exploiting the linear regression: This month’s inflation = constant + coefficient x last month’s inflation and finding a value where this month’s inflation and last month’s inflation is the same. The results showed that the long-run inflation pre-break was 0.07% and post-break was 2.8%." },
+      { type: "text", text: "This supports the original idea where inflation sits at a higher rate post 2021, thus may support Katayama’s claim that Japan is no longer in a same condition." },
+    ],
+  },
 ];
