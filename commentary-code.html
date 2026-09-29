@@ -64,10 +64,10 @@
       </nav>
     </header>
 
-    <!-- Code -->
+    <!-- Post -->
     <main class="mt-8">
-      <a id="back-link" href="commentary.html" class="text-sm text-accent dark:text-accentSoft hover:underline">← Back to post</a>
-      <div id="code-content" class="mt-6"></div>
+      <a href="commentary.html" class="text-sm text-accent dark:text-accentSoft hover:underline">← All commentary</a>
+      <div id="post-content" class="mt-6"></div>
     </main>
 
     <!-- Footer -->
@@ -100,42 +100,64 @@
       return div.innerHTML;
     }
 
-    function renderCode() {
+    function formatDate(dateStr) {
+      const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      const [y, m, d] = dateStr.split('-').map(Number);
+      return `${months[m - 1]} ${d}, ${y}`;
+    }
+
+    function renderBody(body) {
+      if (!Array.isArray(body)) {
+        return body.split('\n\n').map((p) => `<p>${escapeHtml(p)}</p>`).join('');
+      }
+      return body.map((block) => {
+        if (block.type === 'image') {
+          const caption = block.caption
+            ? `<figcaption class="text-xs text-zinc-500 dark:text-slate-400 mt-2 text-center">${escapeHtml(block.caption)}</figcaption>`
+            : '';
+          return `
+            <figure class="not-prose">
+              <img src="${escapeHtml(block.src)}" alt="${escapeHtml(block.alt || '')}" class="w-full rounded-md border border-zinc-200 dark:border-zinc-800" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+              <div class="hidden text-sm text-zinc-500 dark:text-slate-400 italic border border-dashed border-zinc-300 dark:border-zinc-700 rounded-md px-4 py-10 text-center">Figure${block.caption ? ': ' + escapeHtml(block.caption) : ''} (image coming soon)</div>
+              ${caption}
+            </figure>
+          `;
+        }
+        return `<p>${escapeHtml(block.text)}</p>`;
+      }).join('');
+    }
+
+    function renderPost() {
       const params = new URLSearchParams(window.location.search);
       const slug = params.get('slug');
       const entry = COMMENTARY.find((e) => e.slug === slug);
-      const container = document.getElementById('code-content');
-      const backLink = document.getElementById('back-link');
+      const container = document.getElementById('post-content');
 
-      if (!entry || !entry.code) {
-        container.innerHTML = '<p class="text-sm text-zinc-500 dark:text-slate-400 italic">Code not found. <a href="commentary.html" class="text-accent dark:text-accentSoft hover:underline">Back to all commentary</a></p>';
+      if (!entry) {
+        container.innerHTML = '<p class="text-sm text-zinc-500 dark:text-slate-400 italic">Post not found. <a href="commentary.html" class="text-accent dark:text-accentSoft hover:underline">Back to all commentary</a></p>';
         return;
       }
 
-      backLink.href = 'commentary-post.html?slug=' + encodeURIComponent(entry.slug);
-      const label = entry.codeLabel || 'Analysis code';
-      document.title = label + ' — ' + entry.title + ' — Reo (Leo) Ishii';
-
+      document.title = entry.title + ' — Reo (Leo) Ishii';
+      const meta = formatDate(entry.date) + (entry.readTime ? ' · ' + entry.readTime : '');
+      const sourceHtml = entry.sourceLink
+        ? `<p class="text-sm text-zinc-500 dark:text-slate-400 mt-2"><a href="${escapeHtml(entry.sourceLink)}" target="_blank" rel="noopener noreferrer" class="text-accent dark:text-accentSoft hover:underline break-all">${escapeHtml(entry.sourceLink)}</a></p>`
+        : '';
+      const codeHtml = entry.code
+        ? `<p class="text-sm mt-2"><a href="commentary-code.html?slug=${encodeURIComponent(entry.slug)}" class="text-accent dark:text-accentSoft hover:underline">View ${escapeHtml(entry.codeLabel || 'analysis code')} →</a></p>`
+        : '';
       container.innerHTML = `
-        <h2 class="text-3xl font-bold text-zinc-900 dark:text-white">${escapeHtml(label)}</h2>
-        <p class="text-sm text-zinc-500 dark:text-slate-400 mt-2">From “${escapeHtml(entry.title)}”</p>
-        <div class="mt-8 relative">
-          <button id="copy-btn" class="absolute top-3 right-3 text-xs px-3 py-1.5 rounded-full border border-zinc-300 dark:border-zinc-700 text-zinc-500 dark:text-zinc-400 hover:text-accent dark:hover:text-accentSoft hover:border-accent dark:hover:border-accentSoft transition-colors bg-white dark:bg-canvas">Copy</button>
-          <pre class="overflow-x-auto rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 p-5 text-sm leading-relaxed"><code id="code-text">${escapeHtml(entry.code)}</code></pre>
+        <h2 class="text-3xl font-bold text-zinc-900 dark:text-white">${escapeHtml(entry.title)}</h2>
+        <p class="text-sm text-zinc-500 dark:text-slate-400 mt-2">${meta}</p>
+        ${sourceHtml}
+        ${codeHtml}
+        <div class="mt-8 space-y-4 text-base leading-loose text-zinc-600 dark:text-ink">
+          ${renderBody(entry.body)}
         </div>
       `;
-
-      document.getElementById('copy-btn').addEventListener('click', function () {
-        navigator.clipboard.writeText(entry.code).then(function () {
-          const btn = document.getElementById('copy-btn');
-          const original = btn.textContent;
-          btn.textContent = 'Copied';
-          setTimeout(function () { btn.textContent = original; }, 1500);
-        });
-      });
     }
 
-    renderCode();
+    renderPost();
 
     document.getElementById('year').textContent = new Date().getFullYear();
     document.getElementById('theme-toggle').addEventListener('click', function () {
